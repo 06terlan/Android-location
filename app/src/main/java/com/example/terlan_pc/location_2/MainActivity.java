@@ -7,6 +7,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
+import android.os.CountDownTimer;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
@@ -16,28 +17,39 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button btn_get;
+    private Button btn_map, btn_locationLists;
     private TextView tw_location;
     private LocationManager locationManager;
     private LocationListener locationListener;
+    CountDownTimer countDownTimer;
+
+    //
+    private static final int CHECK_PER_TIME = 5; //second
+    private static final int ENROLL_TIME = 1 * 60; //second
+    private double currentLatitude = 0;
+    private double currentLongitude = 0;
+    private int remainigTime = ENROLL_TIME;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.main);
 
-        btn_get = (Button) findViewById(R.id.btn_get);
-        tw_location = (TextView) findViewById(R.id.tw_location);
+        init();
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         locationListener = new LocationListener() {
+
             @Override
             public void onLocationChanged(Location location) {
-                tw_location.append("\n Latitude: " + location.getLatitude() + " Longitude:" + location.getLongitude());
+                tw_location.setText("Current Latitude: " + location.getLatitude() + " Longitude:" + location.getLongitude());
+
+                remainigTime = ENROLL_TIME;
             }
 
             @Override
@@ -69,6 +81,46 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    void init()
+    {
+        btn_map = (Button) findViewById(R.id.btn_map);
+        btn_locationLists = (Button) findViewById(R.id.btn_location_lists);
+        tw_location = (TextView) findViewById(R.id.tw_location);
+
+        btn_map.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent map = new Intent(MainActivity.this, Map.class);
+                startActivity(map);
+            }
+        });
+
+        btn_locationLists.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent locations = new Intent(MainActivity.this, LocationLists.class);
+                startActivity(locations);
+            }
+        });
+
+        countDownTimer = new CountDownTimer(Long.MAX_VALUE, CHECK_PER_TIME * 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                remainigTime -= CHECK_PER_TIME;
+
+                if(remainigTime <= 0)
+                {
+                    Toast.makeText(MainActivity.this,"You have waited so long",Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFinish() {
+
+            }
+        }.start();
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode){
@@ -79,11 +131,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void confugureButton(){
-        btn_get.setOnClickListener(new View.OnClickListener() {
+        /*btn_get.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 locationManager.requestLocationUpdates("gps", 5000, 10, locationListener);
             }
-        });
+        });*/
+
+        locationManager.requestLocationUpdates("gps", CHECK_PER_TIME * 1000, 10, locationListener);
     }
 }
