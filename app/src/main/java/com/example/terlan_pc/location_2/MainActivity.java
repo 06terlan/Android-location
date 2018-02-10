@@ -1,7 +1,11 @@
 package com.example.terlan_pc.location_2;
 
 import android.Manifest;
+import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -21,75 +25,26 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button btn_map, btn_locationLists;
+    private Button btn_map, btn_locationLists, btn_start, btn_stop;
     private TextView tw_location;
-    private LocationManager locationManager;
-    private LocationListener locationListener;
     private CountDownTimer countDownTimer;
-    private DatabaseHelper db;
-
-    //
-    private static final int CHECK_PER_TIME = 5; //second
-    private static final int ENROLL_TIME = 1 * 15; //second
     private String currentLatitude = "0";
     private String currentLongitude = "0";
-    private int remainigTime = ENROLL_TIME;
-    private int not_sended = 0;
+    MyReceiver myReceiver;
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
         init();
-
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        locationListener = new LocationListener() {
-
-            @Override
-            public void onLocationChanged(Location location) {
-                currentLatitude = String.format("%.4f", location.getLatitude());
-                currentLongitude = String.format("%.4f", location.getLongitude());
-                remainigTime = ENROLL_TIME;
-                not_sended = 0;
-
-                tw_location.setText("Current Latitude: " + currentLatitude + " Longitude:" + currentLongitude);
-            }
-
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-
-            }
-
-            @Override
-            public void onProviderEnabled(String provider) {
-
-            }
-
-            @Override
-            public void onProviderDisabled(String provider) {
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(intent);
-            }
-        };
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.INTERNET
-            }, 10);
-            return;
-        }
-        else{
-            confugureButton();
-        }
     }
 
     void init()
     {
-        db = new DatabaseHelper(this);
         btn_map = (Button) findViewById(R.id.btn_map);
+        btn_start = (Button) findViewById(R.id.btn_start);
+        btn_stop = (Button) findViewById(R.id.btn_stop);
         btn_locationLists = (Button) findViewById(R.id.btn_location_lists);
         tw_location = (TextView) findViewById(R.id.tw_location);
 
@@ -111,44 +66,59 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        countDownTimer = new CountDownTimer(Long.MAX_VALUE, CHECK_PER_TIME * 1000) {
+        btn_start.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onTick(long millisUntilFinished) {
-                remainigTime -= CHECK_PER_TIME;
-                not_sended += CHECK_PER_TIME;
-
-                if(remainigTime <= 0)
-                {
-                    int r = db.insert(currentLatitude, currentLongitude, not_sended);
-                    not_sended = 0;
-                    Toast.makeText(MainActivity.this, "You have waited so long " + r, Toast.LENGTH_SHORT).show();
-                }
+            public void onClick(View v) {
+            Intent service = new Intent(MainActivity.this, LocationService.class);
+            startService(service);
             }
+        });
 
+        btn_stop.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onFinish() {
-
+            public void onClick(View v) {
+                Intent service = new Intent(MainActivity.this, LocationService.class);
+                stopService(service);
             }
-        }.start();
+        });
+    }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode){
-            case 10:
-                confugureButton();
-                break;
-        }
+    protected void onStop() {
+        unregisterReceiver(myReceiver);
+        super.onStop();
     }
 
-    void confugureButton(){
-        /*btn_get.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                locationManager.requestLocationUpdates("gps", 5000, 10, locationListener);
-            }
-        });*/
+    @Override
+    protected void onStart() {
+        myReceiver = new MyReceiver();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(LocationService.MY_ACTION);
+        registerReceiver(myReceiver, intentFilter);
 
-        locationManager.requestLocationUpdates("gps", CHECK_PER_TIME * 1000, 10, locationListener);
+        super.onStart();
+    }
+
+    //for receiving data from service
+    private class MyReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context arg0, Intent arg1) {
+            // TODO Auto-generated method stub
+
+            currentLatitude = arg1.getStringExtra("currentLatitude");
+            currentLongitude = arg1.getStringExtra("currentLongitude");
+
+            tw_location.setText("Latitude: " + currentLatitude + " Longitude:" + currentLongitude);
+        }
     }
 }

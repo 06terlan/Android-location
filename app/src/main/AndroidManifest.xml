@@ -35,6 +35,10 @@
             android:name=".Map"
             android:label="@string/title_activity_map" />
         <activity android:name=".LocationLists"></activity>
+
+        <service android:name=".LocationService"
+            android:permission=""
+            ></service>
     </application>
 
 </manifest>
