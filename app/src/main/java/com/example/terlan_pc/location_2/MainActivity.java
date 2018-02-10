@@ -25,14 +25,16 @@ public class MainActivity extends AppCompatActivity {
     private TextView tw_location;
     private LocationManager locationManager;
     private LocationListener locationListener;
-    CountDownTimer countDownTimer;
+    private CountDownTimer countDownTimer;
+    private DatabaseHelper db;
 
     //
     private static final int CHECK_PER_TIME = 5; //second
-    private static final int ENROLL_TIME = 1 * 60; //second
-    private double currentLatitude = 0;
-    private double currentLongitude = 0;
+    private static final int ENROLL_TIME = 1 * 15; //second
+    private String currentLatitude = "0";
+    private String currentLongitude = "0";
     private int remainigTime = ENROLL_TIME;
+    private int not_sended = 0;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -47,9 +49,12 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onLocationChanged(Location location) {
-                tw_location.setText("Current Latitude: " + location.getLatitude() + " Longitude:" + location.getLongitude());
-
+                currentLatitude = String.format("%.4f", location.getLatitude());
+                currentLongitude = String.format("%.4f", location.getLongitude());
                 remainigTime = ENROLL_TIME;
+                not_sended = 0;
+
+                tw_location.setText("Current Latitude: " + currentLatitude + " Longitude:" + currentLongitude);
             }
 
             @Override
@@ -83,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
 
     void init()
     {
+        db = new DatabaseHelper(this);
         btn_map = (Button) findViewById(R.id.btn_map);
         btn_locationLists = (Button) findViewById(R.id.btn_location_lists);
         tw_location = (TextView) findViewById(R.id.tw_location);
@@ -91,6 +97,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent map = new Intent(MainActivity.this, Map.class);
+                map.putExtra("currentLatitude", currentLatitude);
+                map.putExtra("currentLongitude", currentLongitude);
                 startActivity(map);
             }
         });
@@ -107,10 +115,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onTick(long millisUntilFinished) {
                 remainigTime -= CHECK_PER_TIME;
+                not_sended += CHECK_PER_TIME;
 
                 if(remainigTime <= 0)
                 {
-                    Toast.makeText(MainActivity.this,"You have waited so long",Toast.LENGTH_SHORT).show();
+                    int r = db.insert(currentLatitude, currentLongitude, not_sended);
+                    not_sended = 0;
+                    Toast.makeText(MainActivity.this, "You have waited so long " + r, Toast.LENGTH_SHORT).show();
                 }
             }
 
