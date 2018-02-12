@@ -75,13 +75,16 @@ public class LocationService extends Service {
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
+
         Toast.makeText(this, "Service Destroyed", Toast.LENGTH_SHORT).show();
+        running = false;
+        super.onDestroy();
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
+        running = true;
     }
 
     @Override
@@ -130,8 +133,7 @@ public class LocationService extends Service {
             Toast.makeText(this, "You don't have the permissions", Toast.LENGTH_SHORT).show();
         }
         else {
-            locationManager.requestLocationUpdates("gps", CHECK_PER_TIME * 1000, 10, locationListener);
-            //Toast.makeText(this, "Listener binded", Toast.LENGTH_SHORT).show();
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, CHECK_PER_TIME * 1000, 10, locationListener);
         }
 
         if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
