@@ -55,7 +55,6 @@ public class LocationService extends Service {
                     if (remainigTime <= 0) {
                         int r = db.insert(currentLatitude, currentLongitude, not_sended);
                         not_sended = 0;
-                        //Toast.makeText(mainContext, "You have waited so long " + r, Toast.LENGTH_SHORT).show();
                     }
                     try {
                         wait(CHECK_PER_TIME * 1000);
@@ -101,8 +100,12 @@ public class LocationService extends Service {
             public void onLocationChanged(Location location) {
                 currentLatitude = String.format("%.4f", location.getLatitude());
                 currentLongitude = String.format("%.4f", location.getLongitude());
-                remainigTime = ENROLL_TIME;
-                not_sended = 0;
+
+                if(currentLatitude != String.format("%.4f", location.getLatitude()) || currentLongitude != String.format("%.4f", location.getLongitude()))
+                {
+                    remainigTime = ENROLL_TIME;
+                    not_sended = 0;
+                }
 
                 Intent intent = new Intent();
                 intent.setAction(MY_ACTION);
@@ -133,7 +136,7 @@ public class LocationService extends Service {
             Toast.makeText(this, "You don't have the permissions", Toast.LENGTH_SHORT).show();
         }
         else {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, CHECK_PER_TIME * 1000, 10, locationListener);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
         }
 
         if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){

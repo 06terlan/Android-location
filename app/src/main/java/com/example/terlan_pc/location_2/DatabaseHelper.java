@@ -17,7 +17,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TABLE_NAME = "locations";
     
     public DatabaseHelper(Context context) {
-        super(context, DATABASE_NAME, null, 6);
+        super(context, DATABASE_NAME, null, 1);
     }
 
     @Override
