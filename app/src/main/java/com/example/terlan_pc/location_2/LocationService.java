@@ -1,16 +1,13 @@
 package com.example.terlan_pc.location_2;
 
-import android.Manifest;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v4.app.ActivityCompat;
+import android.util.Log;
 import android.widget.Toast;
 
 /**
@@ -19,19 +16,151 @@ import android.widget.Toast;
 
 public class LocationService extends Service {
 
-    private LocationManager locationManager;
-    private LocationListener locationListener;
+    private static final String TAG = "LOGGER";
+    private LocationManager mLocationManager = null;
+    //private static final int LOCATION_INTERVAL = 1000;
+    //private static final float LOCATION_DISTANCE = 10f;
+    final static String MY_ACTION = "LocationReceiver";
     private String currentLatitude = "0";
     private String currentLongitude = "0";
+    private Thread thread;
+    private DatabaseHelper db;
     private static final int CHECK_PER_TIME = 5; //second
     private static final int ENROLL_TIME = 2 * 60; //second
     private int remainigTime = ENROLL_TIME;
     private int not_sended = 0;
-    private DatabaseHelper db;
-    private Thread thread;
-    private Context mainContext;
     private boolean running = true;
-    final static String MY_ACTION = "LocationReceiver";
+    private Context mainContext;
+
+    private class LocationListener implements android.location.LocationListener
+    {
+        Location mLastLocation;
+
+        public LocationListener(String provider)
+        {
+            Log.e(TAG, "LocationListener " + provider);
+            mLastLocation = new Location(provider);
+        }
+
+        @Override
+        public void onLocationChanged(Location location)
+        {
+            mLastLocation.set(location);
+
+            Toast.makeText(mainContext, "Location Change check", Toast.LENGTH_SHORT).show();
+
+            if(currentLatitude != String.format("%.4f", location.getLatitude()) || currentLongitude != String.format("%.4f", location.getLongitude()))
+            {
+                remainigTime = ENROLL_TIME;
+                not_sended = 0;
+            }
+
+            currentLatitude = String.format("%.4f", location.getLatitude());
+            currentLongitude = String.format("%.4f", location.getLongitude());
+
+            Intent intent = new Intent();
+            intent.setAction(MY_ACTION);
+            intent.putExtra("currentLatitude", currentLatitude);
+            intent.putExtra("currentLongitude", currentLongitude);
+            sendBroadcast(intent);
+        }
+
+        @Override
+        public void onProviderDisabled(String provider)
+        {
+            Toast.makeText(mainContext, "Disabled", Toast.LENGTH_SHORT).show();
+            running = false;
+        }
+
+        @Override
+        public void onProviderEnabled(String provider)
+        {
+            Toast.makeText(mainContext, "Enabled", Toast.LENGTH_SHORT).show();
+            running = true;
+            if(!thread.isAlive()) thread.start();
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras)
+        {
+            Log.e(TAG, "onStatusChanged: " + provider);
+        }
+    }
+
+    LocationListener[] mLocationListeners = new LocationListener[] {
+            new LocationListener(LocationManager.GPS_PROVIDER),
+            new LocationListener(LocationManager.NETWORK_PROVIDER)
+    };
+
+    @Override
+    public IBinder onBind(Intent arg0)
+    {
+        return null;
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId)
+    {
+        Toast.makeText(this, "Thread started", Toast.LENGTH_SHORT).show();
+
+        thread =  new Thread(new MyThreadClass(startId));
+        super.onStartCommand(intent, flags, startId);
+        return START_STICKY;
+    }
+
+    @Override
+    public void onCreate()
+    {
+        Toast.makeText(this, "Service Created", Toast.LENGTH_SHORT).show();
+        db = new DatabaseHelper(this);
+        mainContext = this;
+
+        initializeLocationManager();
+        try {
+            mLocationManager.requestLocationUpdates(
+                    LocationManager.NETWORK_PROVIDER, CHECK_PER_TIME * 1000, 0,
+                    mLocationListeners[1]);
+        } catch (java.lang.SecurityException ex) {
+            Log.i(TAG, "fail to request location update, ignore", ex);
+        } catch (IllegalArgumentException ex) {
+            Log.d(TAG, "network provider does not exist, " + ex.getMessage());
+        }
+        try {
+            mLocationManager.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER, CHECK_PER_TIME * 1000, 0,
+                    mLocationListeners[0]);
+        } catch (java.lang.SecurityException ex) {
+            Log.i(TAG, "fail to request location update, ignore", ex);
+        } catch (IllegalArgumentException ex) {
+            Log.d(TAG, "gps provider does not exist " + ex.getMessage());
+        }
+
+        running = true;
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        Toast.makeText(this, "Service Destroyed", Toast.LENGTH_SHORT).show();
+
+        super.onDestroy();
+        if (mLocationManager != null) {
+            for (int i = 0; i < mLocationListeners.length; i++) {
+                try {
+                    mLocationManager.removeUpdates(mLocationListeners[i]);
+                } catch (Exception ex) {
+                    Log.i(TAG, "fail to remove location listners, ignore", ex);
+                }
+            }
+        }
+    }
+
+    private void initializeLocationManager() {
+        Log.e(TAG, "initializeLocationManager");
+        if (mLocationManager == null) {
+            mLocationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+        }
+    }
 
     final class MyThreadClass implements Runnable{
 
@@ -65,85 +194,5 @@ public class LocationService extends Service {
             }
 
         }
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
-
-    @Override
-    public void onDestroy() {
-
-        Toast.makeText(this, "Service Destroyed", Toast.LENGTH_SHORT).show();
-        running = false;
-        super.onDestroy();
-    }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        running = true;
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flag, int startId) {
-        Toast.makeText(this, "Service started", Toast.LENGTH_SHORT).show();
-        db = new DatabaseHelper(this);
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        mainContext = this;
-
-        thread =  new Thread(new MyThreadClass(startId));
-
-        locationListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-                currentLatitude = String.format("%.4f", location.getLatitude());
-                currentLongitude = String.format("%.4f", location.getLongitude());
-
-                if(currentLatitude != String.format("%.4f", location.getLatitude()) || currentLongitude != String.format("%.4f", location.getLongitude()))
-                {
-                    remainigTime = ENROLL_TIME;
-                    not_sended = 0;
-                }
-
-                Intent intent = new Intent();
-                intent.setAction(MY_ACTION);
-                intent.putExtra("currentLatitude", currentLatitude);
-                intent.putExtra("currentLongitude", currentLongitude);
-                sendBroadcast(intent);
-            }
-
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-                //Toast.makeText(mainContext, "onStatusChanged", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onProviderEnabled(String provider) {
-                Toast.makeText(mainContext, "Enabled", Toast.LENGTH_SHORT).show();
-                running = true;
-                if(!thread.isAlive()) thread.start();
-            }
-
-            @Override
-            public void onProviderDisabled(String provider) {
-                Toast.makeText(mainContext, "Disabled", Toast.LENGTH_SHORT).show();
-                running = false;
-            }
-        };
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, "You don't have the permissions", Toast.LENGTH_SHORT).show();
-        }
-        else {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-        }
-
-        if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-            running = true;
-            thread.start();
-        }
-
-        return START_STICKY;
     }
 }
