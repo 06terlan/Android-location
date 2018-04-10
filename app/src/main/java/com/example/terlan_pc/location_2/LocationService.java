@@ -26,7 +26,7 @@ public class LocationService extends Service {
     private Thread thread;
     private DatabaseHelper db;
     private static final int CHECK_PER_TIME = 5; //second
-    private static final int ENROLL_TIME = 2 * 60; //second
+    private static final int ENROLL_TIME = 1 * 60; //second
     private int remainigTime = ENROLL_TIME;
     private int not_sended = 0;
     private boolean running = true;
@@ -36,7 +36,7 @@ public class LocationService extends Service {
     {
         Location mLastLocation;
 
-        public LocationListener(String provider)
+        LocationListener(String provider)
         {
             Log.e(TAG, "LocationListener " + provider);
             mLastLocation = new Location(provider);
@@ -49,10 +49,14 @@ public class LocationService extends Service {
 
             Toast.makeText(mainContext, "Location Change check", Toast.LENGTH_SHORT).show();
 
-            if(currentLatitude != String.format("%.4f", location.getLatitude()) || currentLongitude != String.format("%.4f", location.getLongitude()))
+            if( currentLatitude.equals(String.format("%.4f", location.getLatitude())) == false || currentLongitude.equals(String.format("%.4f", location.getLongitude())) == false )
             {
+                Toast.makeText(mainContext, "Location Changed", Toast.LENGTH_SHORT).show();
                 remainigTime = ENROLL_TIME;
                 not_sended = 0;
+
+                if(running && !thread.isAlive())  thread.start();
+
             }
 
             currentLatitude = String.format("%.4f", location.getLatitude());
@@ -104,6 +108,7 @@ public class LocationService extends Service {
         Toast.makeText(this, "Thread started", Toast.LENGTH_SHORT).show();
 
         thread =  new Thread(new MyThreadClass(startId));
+
         super.onStartCommand(intent, flags, startId);
         return START_STICKY;
     }
@@ -127,7 +132,7 @@ public class LocationService extends Service {
         }
         try {
             mLocationManager.requestLocationUpdates(
-                    LocationManager.GPS_PROVIDER, CHECK_PER_TIME * 1000, 0,
+                    LocationManager.GPS_PROVIDER, 0, 10,
                     mLocationListeners[0]);
         } catch (java.lang.SecurityException ex) {
             Log.i(TAG, "fail to request location update, ignore", ex);
@@ -176,13 +181,13 @@ public class LocationService extends Service {
 
             synchronized (this)
             {
-                while(running==true)
+                while(running == true)
                 {
                     remainigTime -= CHECK_PER_TIME;
                     not_sended += CHECK_PER_TIME;
 
                     if (remainigTime <= 0) {
-                        int r = db.insert(currentLatitude, currentLongitude, not_sended);
+                        db.insert(currentLatitude, currentLongitude, not_sended);
                         not_sended = 0;
                     }
                     try {
