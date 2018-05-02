@@ -32,11 +32,8 @@ public class LocationService extends Service {
         boardCast.setAction(MY_ACTION);
 
         super.onCreate();
-    }
 
-    @Override
-    public void onStart(Intent intent, int startId) {
-        Toast.makeText(this, "Service started", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Service Created", Toast.LENGTH_SHORT).show();
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         listener = new MyLocationListener();
@@ -46,6 +43,9 @@ public class LocationService extends Service {
         }
         //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 4000, 0, listener);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, CHECK_PER_TIME * 1000, 0, listener);
+
+        Location loc =  locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+        if(loc != null) locationChanged(loc);
     }
 
     @Override
@@ -66,20 +66,7 @@ public class LocationService extends Service {
 
         public void onLocationChanged(final Location location)
         {
-            Toast.makeText( getApplicationContext(), "LocationChanged currentLatitude: " + currentLatitude, Toast.LENGTH_SHORT ).show();
-
-            if(!currentLatitude.equals(String.format("%.4f", location.getLatitude())) || !currentLongitude.equals(String.format("%.4f", location.getLongitude())))
-            {
-                remainigTime = ENROLL_TIME;
-                not_sended = 0;
-            }
-
-            currentLatitude = String.format("%.4f", location.getLatitude());
-            currentLongitude = String.format("%.4f", location.getLongitude());
-
-            boardCast.putExtra("currentLatitude", currentLatitude);
-            boardCast.putExtra("currentLongitude", currentLongitude);
-            sendBroadcast(boardCast);
+            locationChanged(location);
         }
 
         public void onProviderDisabled(String provider)
@@ -97,5 +84,24 @@ public class LocationService extends Service {
             Toast.makeText( getApplicationContext(), "Status Changed", Toast.LENGTH_SHORT).show();
         }
 
+    }
+
+    //my functions
+    private void locationChanged(Location location)
+    {
+        Toast.makeText( getApplicationContext(), "LocationChanged currentLatitude: " + currentLatitude, Toast.LENGTH_SHORT ).show();
+
+        if(!currentLatitude.equals(String.format("%.4f", location.getLatitude())) || !currentLongitude.equals(String.format("%.4f", location.getLongitude())))
+        {
+            remainigTime = ENROLL_TIME;
+            not_sended = 0;
+        }
+
+        currentLatitude = String.format("%.4f", location.getLatitude());
+        currentLongitude = String.format("%.4f", location.getLongitude());
+
+        boardCast.putExtra("currentLatitude", currentLatitude);
+        boardCast.putExtra("currentLongitude", currentLongitude);
+        sendBroadcast(boardCast);
     }
 }

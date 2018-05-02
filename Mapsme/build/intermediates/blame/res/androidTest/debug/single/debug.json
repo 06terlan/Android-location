@@ -1,0 +1,54 @@
+[
+    {
+        "merged": "C:\\Users\\tabdullayev\\AndroidStudioProjects\\Android-location\\Mapsme\\build\\intermediates\\res\\merged\\androidTest\\debug\\layout_dlg_install_mwm.xml.flat",
+        "source": "C:\\Users\\tabdullayev\\AndroidStudioProjects\\Android-location\\Mapsme\\build\\intermediates\\packaged_res\\debug\\layout\\dlg_install_mwm.xml"
+    },
+    {
+        "merged": "C:\\Users\\tabdullayev\\AndroidStudioProjects\\Android-location\\Mapsme\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable_btn_back_gray.xml.flat",
+        "source": "C:\\Users\\tabdullayev\\AndroidStudioProjects\\Android-location\\Mapsme\\build\\intermediates\\packaged_res\\debug\\drawable\\btn_back_gray.xml"
+    },
+    {
+        "merged": "C:\\Users\\tabdullayev\\AndroidStudioProjects\\Android-location\\Mapsme\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable_btn_back_green_active.xml.flat",
+        "source": "C:\\Users\\tabdullayev\\AndroidStudioProjects\\Android-location\\Mapsme\\build\\intermediates\\packaged_res\\debug\\drawable\\btn_back_green_active.xml"
+    },
+    {
+        "merged": "C:\\Users\\tabdullayev\\AndroidStudioProjects\\Android-location\\Mapsme\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable_btn_back_green.xml.flat",
+        "source": "C:\\Users\\tabdullayev\\AndroidStudioProjects\\Android-location\\Mapsme\\build\\intermediates\\packaged_res\\debug\\drawable\\btn_back_green.xml"
+    },
+    {
+        "merged": "C:\\Users\\tabdullayev\\AndroidStudioProjects\\Android-location\\Mapsme\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable_green.xml.flat",
+        "source": "C:\\Users\\tabdullayev\\AndroidStudioProjects\\Android-location\\Mapsme\\build\\intermediates\\packaged_res\\debug\\drawable\\green.xml"
+    },
+    {
+        "merged": "C:\\Users\\tabdullayev\\AndroidStudioProjects\\Android-location\\Mapsme\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable_gray.xml.flat",
+        "source": "C:\\Users\\tabdullayev\\AndroidStudioProjects\\Android-location\\Mapsme\\build\\intermediates\\packaged_res\\debug\\drawable\\gray.xml"
+    },
+    {
+        "merged": "C:\\Users\\tabdullayev\\AndroidStudioProjects\\Android-location\\Mapsme\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable_btn_back_gray_active.xml.flat",
+        "source": "C:\\Users\\tabdullayev\\AndroidStudioProjects\\Android-location\\Mapsme\\build\\intermediates\\packaged_res\\debug\\drawable\\btn_back_gray_active.xml"
+    },
+    {
+        "merged": "C:\\Users\\tabdullayev\\AndroidStudioProjects\\Android-location\\Mapsme\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable_background_pattern.xml.flat",
+        "source": "C:\\Users\\tabdullayev\\AndroidStudioProjects\\Android-location\\Mapsme\\build\\intermediates\\packaged_res\\debug\\drawable\\background_pattern.xml"
+    },
+    {
+        "merged": "C:\\Users\\tabdullayev\\AndroidStudioProjects\\Android-location\\Mapsme\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable_overflow.xml.flat",
+        "source": "C:\\Users\\tabdullayev\\AndroidStudioProjects\\Android-location\\Mapsme\\build\\intermediates\\packaged_res\\debug\\drawable\\overflow.xml"
+    },
+    {
+        "merged": "C:\\Users\\tabdullayev\\AndroidStudioProjects\\Android-location\\Mapsme\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable_pattern.png.flat",
+        "source": "C:\\Users\\tabdullayev\\AndroidStudioProjects\\Android-location\\Mapsme\\build\\intermediates\\packaged_res\\debug\\drawable\\pattern.png"
+    },
+    {
+        "merged": "C:\\Users\\tabdullayev\\AndroidStudioProjects\\Android-location\\Mapsme\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable_btn_gray_selector.xml.flat",
+        "source": "C:\\Users\\tabdullayev\\AndroidStudioProjects\\Android-location\\Mapsme\\build\\intermediates\\packaged_res\\debug\\drawable\\btn_gray_selector.xml"
+    },
+    {
+        "merged": "C:\\Users\\tabdullayev\\AndroidStudioProjects\\Android-location\\Mapsme\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable_shadow.xml.flat",
+        "source": "C:\\Users\\tabdullayev\\AndroidStudioProjects\\Android-location\\Mapsme\\build\\intermediates\\packaged_res\\debug\\drawable\\shadow.xml"
+    },
+    {
+        "merged": "C:\\Users\\tabdullayev\\AndroidStudioProjects\\Android-location\\Mapsme\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable_btn_green_selector.xml.flat",
+        "source": "C:\\Users\\tabdullayev\\AndroidStudioProjects\\Android-location\\Mapsme\\build\\intermediates\\packaged_res\\debug\\drawable\\btn_green_selector.xml"
+    }
+]

@@ -2,30 +2,46 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:padding="20dp"
+    android:background="@color/colorMainBack"
     android:layout_height="match_parent">
 
     <Button
         android:id="@+id/btn_start"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textColor="@color/btnColor"
+        android:textSize="20sp"
+        android:background="@color/btnBackColor"
         android:text="Start" />
 
     <Button
         android:id="@+id/btn_stop"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:textColor="@color/btnColor"
+        android:textSize="20sp"
+        android:background="@color/btnBackColor"
         android:text="Stop" />
 
     <Button
         android:id="@+id/btn_location_lists"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:textColor="@color/btnColor"
+        android:textSize="20sp"
+        android:background="@color/btnBackColor"
         android:text="Location" />
 
     <Button
         android:id="@+id/btn_map"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:textColor="@color/btnColor"
+        android:textSize="20sp"
+        android:background="@color/btnBackColor"
         android:text="Map" />
 
     <TextView
@@ -35,6 +51,7 @@
         android:layout_width="match_parent"
         android:textAlignment="center"
         android:paddingTop="10dp"
+        android:layout_marginTop="5dp"
         android:textSize="25dp" />
 
     <TextView

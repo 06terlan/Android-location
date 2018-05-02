@@ -51,7 +51,12 @@ public class MainActivity extends AppCompatActivity {
         btn_map.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent map = new Intent(MainActivity.this, Map.class);
+                /*Intent map = new Intent(MainActivity.this, Map.class);
+                map.putExtra("currentLatitude", currentLatitude);
+                map.putExtra("currentLongitude", currentLongitude);
+                startActivity(map);*/
+
+                Intent map = new Intent(MainActivity.this, MapsMe.class);
                 map.putExtra("currentLatitude", currentLatitude);
                 map.putExtra("currentLongitude", currentLongitude);
                 startActivity(map);
