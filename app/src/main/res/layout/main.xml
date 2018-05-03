@@ -44,6 +44,16 @@
         android:background="@color/btnBackColor"
         android:text="Map" />
 
+    <Button
+        android:id="@+id/btn_map_ofline"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:textColor="@color/btnColor"
+        android:textSize="20sp"
+        android:background="@color/btnBackColor"
+        android:text="Ofline Map" />
+
     <TextView
         android:id="@+id/tw_locationText"
         android:text="Current Locations"

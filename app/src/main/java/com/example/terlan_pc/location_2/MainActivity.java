@@ -2,11 +2,13 @@ package com.example.terlan_pc.location_2;
 
 import android.Manifest;
 import android.app.ActivityManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -23,14 +25,18 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mapswithme.maps.api.MWMPoint;
+import com.mapswithme.maps.api.MapsWithMeApi;
+
 public class MainActivity extends AppCompatActivity {
 
-    private Button btn_map, btn_locationLists, btn_start, btn_stop;
+    private Button btn_map_of, btn_map, btn_locationLists, btn_start, btn_stop;
     private TextView tw_location;
     private CountDownTimer countDownTimer;
     private String currentLatitude = "0";
     private String currentLongitude = "0";
     MyReceiver myReceiver;
+    public static String EXTRA_FROM_MWM = "from-maps-with-me";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
     void init()
     {
         btn_map = (Button) findViewById(R.id.btn_map);
+        btn_map_of = (Button) findViewById(R.id.btn_map_ofline);
         btn_start = (Button) findViewById(R.id.btn_start);
         btn_stop = (Button) findViewById(R.id.btn_stop);
         btn_locationLists = (Button) findViewById(R.id.btn_location_lists);
@@ -51,15 +58,39 @@ public class MainActivity extends AppCompatActivity {
         btn_map.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*Intent map = new Intent(MainActivity.this, Map.class);
-                map.putExtra("currentLatitude", currentLatitude);
-                map.putExtra("currentLongitude", currentLongitude);
-                startActivity(map);*/
-
-                Intent map = new Intent(MainActivity.this, MapsMe.class);
+                Intent map = new Intent(MainActivity.this, Map.class);
                 map.putExtra("currentLatitude", currentLatitude);
                 map.putExtra("currentLongitude", currentLongitude);
                 startActivity(map);
+            }
+        });
+
+        btn_map_of.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(MapsWithMeApi.isMapsWithMeInstalled(MainActivity.this)){
+                    PendingIntent pendingIntent = MapsMe.getPendingIntent(MainActivity.this);
+                    MapsWithMeApi.showPointsOnMap(MainActivity.this, "Locations");
+
+                    //locations
+                    DatabaseHelper db = new DatabaseHelper(getBaseContext());
+                    Cursor all = db.getDB().rawQuery("SELECT latitude,longitude,waited FROM locations",null);
+
+                    if(all.getCount() != 0)
+                    {
+                        int i = 0;
+                        final MWMPoint[] points = new MWMPoint[all.getCount()];
+                        while (all.moveToNext()){
+                            points[i] = new MWMPoint(all.getFloat(0), all.getFloat(1), "Waited: " +  (int)(all.getInt(2)/60) + ":" + (int)(all.getInt(2)%60), String.valueOf(i));
+                            i++;
+                        }
+
+                        MapsWithMeApi.showPointsOnMap(MainActivity.this, "This title says that user should choose some point", pendingIntent, points);
+                    }
+                }
+                else{
+                    Toast.makeText(MainActivity.this, "MapsWithMe must be installed.", Toast.LENGTH_LONG).show();
+                }
             }
         });
 
@@ -112,6 +143,14 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(myReceiver, intentFilter);
 
         super.onStart();
+    }
+
+    //some
+    public static PendingIntent getPendingIntent(Context context)
+    {
+        final Intent i = new Intent(context, MainActivity.class);
+        i.putExtra(EXTRA_FROM_MWM, true);
+        return PendingIntent.getActivity(context, 0, i, 0);
     }
 
     //for receiving data from service
